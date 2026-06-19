@@ -81,13 +81,17 @@ def run_runbook(script: str, service: str, dry_run: bool, timeout_s: int = 30) -
     """Execute runbook script. Returns True on exit code 0."""
     import sys
     import os
+    import shlex
     bash_path = "/bin/bash"
     if sys.platform == "win32":
         for p in [r"C:\Program Files\Git\bin\bash.exe", r"C:\Program Files\Git\usr\bin\bash.exe", "bash.exe"]:
             if os.path.exists(p) or p == "bash.exe":
                 bash_path = p
                 break
-    cmd = [bash_path, script, "--service", service]
+    parts = shlex.split(script)
+    script_file = parts[0]
+    script_args = parts[1:]
+    cmd = [bash_path, script_file] + script_args + ["--service", service]
     if dry_run:
         cmd.append("--dry-run")
     log.info("RUNBOOK_EXEC", script=script, service=service, dry_run=dry_run)
